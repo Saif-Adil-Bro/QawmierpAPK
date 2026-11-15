@@ -254,17 +254,16 @@ fun AdminDashboardScreen(
                 Text("সকল মডিউল", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
             }
 
-            val modules = listOf(
-                ModuleItem(stringResource(R.string.students), Icons.Default.People, Color(0xFF047857), Routes.STUDENTS),
-                ModuleItem(stringResource(R.string.attendance), Icons.Default.FactCheck, Color(0xFF0F766E), Routes.ATTENDANCE),
-                ModuleItem(stringResource(R.string.hifz_kitab), Icons.Default.MenuBook, Color(0xFF4338CA), Routes.HIFZ_KITAB),
-                ModuleItem(stringResource(R.string.fees), Icons.Default.Payments, Color(0xFFB45309), Routes.FEES),
-                ModuleItem("পরীক্ষা ও ছুটি", Icons.Default.Assignment, Color(0xFF7C3AED), Routes.EXAMS),
-                ModuleItem("হিসাব ও যাকাত", Icons.Default.AccountBalance, Color(0xFFBE123C), Routes.FINANCE),
-                ModuleItem("বোর্ডিং ও লাইব্রেরি", Icons.Default.AdminPanelSettings, Color(0xFF334155), Routes.OPERATIONS)
-            )
-
             item {
+                val modules = listOf(
+                    ModuleItem(stringResource(R.string.students), Icons.Default.People, Color(0xFF047857), Routes.STUDENTS),
+                    ModuleItem(stringResource(R.string.attendance), Icons.Default.FactCheck, Color(0xFF0F766E), Routes.ATTENDANCE),
+                    ModuleItem(stringResource(R.string.hifz_kitab), Icons.Default.MenuBook, Color(0xFF4338CA), Routes.HIFZ_KITAB),
+                    ModuleItem(stringResource(R.string.fees), Icons.Default.Payments, Color(0xFFB45309), Routes.FEES),
+                    ModuleItem("পরীক্ষা ও ছুটি", Icons.Default.Assignment, Color(0xFF7C3AED), Routes.EXAMS),
+                    ModuleItem("হিসাব ও যাকাত", Icons.Default.AccountBalance, Color(0xFFBE123C), Routes.FINANCE),
+                    ModuleItem("বোর্ডিং ও লাইব্রেরি", Icons.Default.AdminPanelSettings, Color(0xFF334155), Routes.OPERATIONS)
+                )
                 ResponsiveGrid(items = modules) { m, mod ->
                     ActionTile(m.title, m.icon, m.tint, mod) { onNavigate(m.route) }
                 }
