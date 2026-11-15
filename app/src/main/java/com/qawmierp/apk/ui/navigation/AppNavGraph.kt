@@ -19,6 +19,7 @@ import com.qawmierp.apk.ui.auth.RegisterScreen
 import com.qawmierp.apk.ui.dashboard.AdminDashboardScreen
 import com.qawmierp.apk.ui.exams.ExamsScreen
 import com.qawmierp.apk.ui.finance.FinanceScreen
+import com.qawmierp.apk.ui.operations.OperationsScreen
 import com.qawmierp.apk.ui.portal.StudentPortalScreen
 import com.qawmierp.apk.ui.portal.TeacherPortalScreen
 import com.qawmierp.apk.ui.utility.FeesScreen
@@ -105,6 +106,9 @@ fun AppNavGraph(sessionExpired: Boolean) {
         }
         composable(Routes.FINANCE) {
             FinanceScreen(onBack = { navController.popBackStack() })
+        }
+        composable(Routes.OPERATIONS) {
+            OperationsScreen(onBack = { navController.popBackStack() })
         }
         composable(Routes.NOTIFICATIONS) {
             NotificationsScreen(onBack = { navController.popBackStack() })

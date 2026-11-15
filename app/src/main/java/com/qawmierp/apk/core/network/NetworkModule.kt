@@ -81,4 +81,9 @@ object NetworkModule {
     @Singleton
     fun providePhase2ApiService(retrofit: Retrofit): Phase2ApiService =
         retrofit.create(Phase2ApiService::class.java)
+
+    @Provides
+    @Singleton
+    fun providePhase3ApiService(retrofit: Retrofit): Phase3ApiService =
+        retrofit.create(Phase3ApiService::class.java)
 }

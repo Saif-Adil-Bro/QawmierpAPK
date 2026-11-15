@@ -15,6 +15,7 @@ object Routes {
     const val FEES = "fees"
     const val EXAMS = "exams"
     const val FINANCE = "finance"
+    const val OPERATIONS = "operations"
     const val NOTIFICATIONS = "notifications"
     const val SETTINGS = "settings"
 }

@@ -153,6 +153,11 @@ fun AdminDashboardScreen(
                     }
                 }
             }
+            item {
+                ActionTile("বোর্ডিং, লাইব্রেরি ও সিকিউরিটি", Icons.Default.AdminPanelSettings, Modifier.fillMaxWidth()) {
+                    onNavigate(Routes.OPERATIONS)
+                }
+            }
         }
     }
 }
