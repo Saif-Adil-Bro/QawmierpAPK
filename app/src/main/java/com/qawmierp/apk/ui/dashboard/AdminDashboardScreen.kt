@@ -143,6 +143,16 @@ fun AdminDashboardScreen(
                     }
                 }
             }
+            item {
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    ActionTile("পরীক্ষা ও ছুটি", Icons.Default.Assignment, Modifier.weight(1f)) {
+                        onNavigate(Routes.EXAMS)
+                    }
+                    ActionTile("হিসাব ও যাকাত", Icons.Default.AccountBalance, Modifier.weight(1f)) {
+                        onNavigate(Routes.FINANCE)
+                    }
+                }
+            }
         }
     }
 }

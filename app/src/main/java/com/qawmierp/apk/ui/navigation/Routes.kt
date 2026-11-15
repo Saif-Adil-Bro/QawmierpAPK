@@ -13,6 +13,8 @@ object Routes {
     const val ATTENDANCE = "attendance"
     const val HIFZ_KITAB = "hifz_kitab"
     const val FEES = "fees"
+    const val EXAMS = "exams"
+    const val FINANCE = "finance"
     const val NOTIFICATIONS = "notifications"
     const val SETTINGS = "settings"
 }

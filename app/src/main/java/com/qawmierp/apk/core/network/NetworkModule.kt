@@ -76,4 +76,9 @@ object NetworkModule {
     @Singleton
     fun provideQawmiApiService(retrofit: Retrofit): QawmiApiService =
         retrofit.create(QawmiApiService::class.java)
+
+    @Provides
+    @Singleton
+    fun providePhase2ApiService(retrofit: Retrofit): Phase2ApiService =
+        retrofit.create(Phase2ApiService::class.java)
 }
