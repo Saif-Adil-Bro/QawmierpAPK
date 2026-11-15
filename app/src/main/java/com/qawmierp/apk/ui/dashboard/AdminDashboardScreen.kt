@@ -117,6 +117,19 @@ fun AdminDashboardScreen(
                         KpiCard("নিট ব্যালেন্স", "৳${d.net_balance.toInt()}", Modifier.weight(1f))
                     }
                 }
+                item {
+                    AttendanceDonutChart(present = d.today_present, absent = d.today_absent)
+                }
+                if (d.monthly_income_expense.isNotEmpty()) {
+                    item {
+                        MonthlyIncomeExpenseChart(items = d.monthly_income_expense)
+                    }
+                }
+                if (d.exam_pass_rate.isNotEmpty()) {
+                    item {
+                        ExamPassRateSection(rates = d.exam_pass_rate)
+                    }
+                }
             }
 
             item {

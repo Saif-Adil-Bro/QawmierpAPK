@@ -1,0 +1,25 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Dome silhouette -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M54,24 C42,32 36,42 36,52 L72,52 C72,42 66,32 54,24 Z" />
+    <!-- Crescent -->
+    <path
+        android:fillColor="#F59E0B"
+        android:pathData="M54,16 A4.5,4.5 0 1,0 54,25 A3.5,3.5 0 1,1 54,16 Z" />
+    <!-- Open Book / Kitab -->
+    <path
+        android:fillColor="#CCFBF1"
+        android:pathData="M28,56 L52,60 L52,82 L28,78 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M80,56 L56,60 L56,82 L80,78 Z" />
+    <!-- Gold spine accent -->
+    <path
+        android:fillColor="#F59E0B"
+        android:pathData="M52.5,58 L55.5,58 L55.5,83 L52.5,83 Z" />
+</vector>

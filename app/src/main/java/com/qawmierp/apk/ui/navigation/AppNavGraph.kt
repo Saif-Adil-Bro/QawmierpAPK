@@ -14,6 +14,7 @@ import com.qawmierp.apk.ui.academic.AttendanceScreen
 import com.qawmierp.apk.ui.academic.HifzKitabScreen
 import com.qawmierp.apk.ui.academic.StudentsScreen
 import com.qawmierp.apk.ui.auth.AuthViewModel
+import com.qawmierp.apk.ui.auth.BrandedSplashScreen
 import com.qawmierp.apk.ui.auth.LoginScreen
 import com.qawmierp.apk.ui.auth.RegisterScreen
 import com.qawmierp.apk.ui.dashboard.AdminDashboardScreen
@@ -53,9 +54,7 @@ fun AppNavGraph(sessionExpired: Boolean) {
                     }
                 }
             }
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator()
-            }
+            BrandedSplashScreen()
         }
 
         composable(Routes.LOGIN) {
