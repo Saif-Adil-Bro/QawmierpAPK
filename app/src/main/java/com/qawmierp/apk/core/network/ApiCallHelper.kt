@@ -1,7 +1,15 @@
 package com.qawmierp.apk.core.network
 
+import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import retrofit2.Response
+
+@Serializable
+private data class ErrorEnvelope(
+    val success: Boolean = false,
+    val message: String? = null,
+    val code: String? = null
+)
 
 suspend fun <T> safeApiCall(
     json: Json,
@@ -28,7 +36,7 @@ suspend fun <T> safeApiCall(
             val errorRaw = response.errorBody()?.string()
             val parsedError = if (!errorRaw.isNullOrBlank()) {
                 runCatching {
-                    json.decodeFromString(ApiResponse.serializer(kotlinx.serialization.builtins.serializer<Unit>()), errorRaw)
+                    json.decodeFromString(ErrorEnvelope.serializer(), errorRaw)
                 }.getOrNull()
             } else null
 
