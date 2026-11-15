@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">QawmiERP V2.0</string>
+    <string name="login_title">Sign In to QawmiERP</string>
+    <string name="identifier_hint">Email / Student ID / Roll / Phone</string>
+    <string name="password_hint">Password</string>
+    <string name="login_button">Sign In</string>
+    <string name="register_link">Register New Madrasa</string>
+    <string name="server_settings">Server Configuration</string>
+    <string name="dashboard_title">Admin Dashboard</string>
+    <string name="teacher_portal_title">Teacher Portal</string>
+    <string name="student_portal_title">Student / Guardian Portal</string>
+    <string name="students">Students</string>
+    <string name="attendance">Attendance</string>
+    <string name="hifz_kitab">Hifz &amp; Kitab</string>
+    <string name="fees">Fees</string>
+    <string name="notifications">Notifications</string>
+    <string name="settings">Settings</string>
+    <string name="logout">Logout</string>
+    <string name="language">Language</string>
+    <string name="offline_saved">Saved offline. Will sync automatically when online.</string>
+</resources>

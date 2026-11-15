@@ -1,0 +1,4 @@
+-keepattributes *Annotation*
+-keepclassmembers class kotlinx.serialization.json.** { *; }
+-keepclassmembers class com.qawmierp.apk.core.network.dto.** { *; }
+-dontwarn kotlinx.serialization.**

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">কওমী ইআরপি ২.০</string>
+    <string name="login_title">কওমী ইআরপি লগইন</string>
+    <string name="identifier_hint">ইমেইল / ছাত্র আইডি / রোল / মোবাইল</string>
+    <string name="password_hint">পাসওয়ার্ড</string>
+    <string name="login_button">লগইন করুন</string>
+    <string name="register_link">নতুন মাদ্রাসা নিবন্ধন করুন</string>
+    <string name="server_settings">সার্ভার সেটিংস</string>
+    <string name="dashboard_title">অ্যাডমিন ড্যাশবোর্ড</string>
+    <string name="teacher_portal_title">উস্তাদ পোর্টাল</string>
+    <string name="student_portal_title">ছাত্র / অভিভাবক পোর্টাল</string>
+    <string name="students">ছাত্রবৃন্দ</string>
+    <string name="attendance">হাজিরা</string>
+    <string name="hifz_kitab">হিফজ ও কিতাব</string>
+    <string name="fees">ফি ও পেমেন্ট</string>
+    <string name="notifications">নোটিফিকেশন</string>
+    <string name="settings">সেটিংস</string>
+    <string name="logout">লগআউট</string>
+    <string name="language">ভাষা</string>
+    <string name="offline_saved">অফলাইনে সংরক্ষিত হয়েছে। ইন্টারনেট পেলে স্বয়ংক্রিয়ভাবে সিঙ্ক হবে।</string>
+</resources>
