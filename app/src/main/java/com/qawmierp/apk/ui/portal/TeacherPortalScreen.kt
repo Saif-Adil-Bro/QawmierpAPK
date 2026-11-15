@@ -17,16 +17,24 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.qawmierp.apk.R
 import com.qawmierp.apk.core.i18n.toBanglaNumber
+import com.qawmierp.apk.ui.components.ResponsiveGrid
 import com.qawmierp.apk.ui.navigation.Routes
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-@OptIn(ExperimentalMaterial3Api::class)
+private data class TeacherKpi(
+    val title: String,
+    val value: String,
+    val color: Color
+)
+
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun TeacherPortalScreen(
     onNavigate: (String) -> Unit,
@@ -42,7 +50,14 @@ fun TeacherPortalScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.teacher_portal_title), fontWeight = FontWeight.Bold) },
+                title = {
+                    Text(
+                        stringResource(R.string.teacher_portal_title),
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                },
                 actions = {
                     IconButton(onClick = { viewModel.loadTeacherPortal() }) {
                         Icon(Icons.Default.Refresh, contentDescription = "Refresh")
@@ -76,7 +91,7 @@ fun TeacherPortalScreen(
             }
 
             state.data?.let { portal ->
-                // 1. Teacher Welcome Banner (matching app/teacher-portal/page.tsx)
+                // 1. Teacher Welcome Banner (Responsive FlowRow)
                 item {
                     Box(
                         modifier = Modifier
@@ -116,11 +131,14 @@ fun TeacherPortalScreen(
                                 color = Color(0xFFD1FAE5)
                             )
 
-                            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                            FlowRow(
+                                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                                verticalArrangement = Arrangement.spacedBy(8.dp),
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
                                 Button(
                                     onClick = { onNavigate(Routes.ATTENDANCE) },
-                                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF059669)),
-                                    modifier = Modifier.weight(1f)
+                                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF059669))
                                 ) {
                                     Icon(Icons.Default.FactCheck, contentDescription = null, modifier = Modifier.size(16.dp))
                                     Spacer(modifier = Modifier.width(6.dp))
@@ -128,8 +146,7 @@ fun TeacherPortalScreen(
                                 }
                                 OutlinedButton(
                                     onClick = { onNavigate(Routes.HIFZ_KITAB) },
-                                    colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White),
-                                    modifier = Modifier.weight(1f)
+                                    colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White)
                                 ) {
                                     Icon(Icons.Default.MenuBook, contentDescription = null, modifier = Modifier.size(16.dp))
                                     Spacer(modifier = Modifier.width(6.dp))
@@ -140,19 +157,20 @@ fun TeacherPortalScreen(
                     }
                 }
 
-                // 2. Teacher 4 KPI Cards
+                // 2. Responsive 4 Teacher KPI Cards (1/2/4 columns)
+                val teacherKpis = listOf(
+                    TeacherKpi("বরাদ্দকৃত কিতাব", "${toBanglaNumber(portal.assigned_subjects.size)} টি", Color(0xFF047857)),
+                    TeacherKpi("ক্লাস রুটিন", "${toBanglaNumber(portal.routines.size)} টি", Color(0xFF4338CA)),
+                    TeacherKpi("নির্ধারিত শ্রেণি", "${toBanglaNumber(portal.classes.size)} টি", Color(0xFF0F766E)),
+                    TeacherKpi("নোটিশ", "${toBanglaNumber(portal.notices.size)} টি", Color(0xFF7C3AED))
+                )
+
                 item {
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                        ElevatedCard(modifier = Modifier.weight(1f), shape = RoundedCornerShape(16.dp)) {
-                            Column(modifier = Modifier.padding(14.dp)) {
-                                Text("বরাদ্দকৃত কিতাব", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                Text("${toBanglaNumber(portal.assigned_subjects.size)} টি", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = Color(0xFF047857))
-                            }
-                        }
-                        ElevatedCard(modifier = Modifier.weight(1f), shape = RoundedCornerShape(16.dp)) {
-                            Column(modifier = Modifier.padding(14.dp)) {
-                                Text("নির্ধারিত শ্রেণি", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                Text("${toBanglaNumber(portal.classes.size)} টি", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = Color(0xFF4338CA))
+                    ResponsiveGrid(items = teacherKpis) { kpi, mod ->
+                        ElevatedCard(modifier = mod, shape = RoundedCornerShape(16.dp)) {
+                            Column(modifier = Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                                Text(kpi.title, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                Text(kpi.value, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = kpi.color, maxLines = 1, overflow = TextOverflow.Ellipsis)
                             }
                         }
                     }
