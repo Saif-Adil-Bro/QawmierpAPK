@@ -16,18 +16,35 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.qawmierp.apk.R
 import com.qawmierp.apk.core.i18n.formatBanglaCurrency
 import com.qawmierp.apk.core.i18n.toBanglaNumber
 import com.qawmierp.apk.core.i18n.translateRoleToBangla
+import com.qawmierp.apk.ui.components.ResponsiveGrid
 import com.qawmierp.apk.ui.navigation.Routes
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-@OptIn(ExperimentalMaterial3Api::class)
+private data class KpiItem(
+    val title: String,
+    val value: String,
+    val icon: ImageVector,
+    val badgeBg: Color,
+    val badgeTint: Color
+)
+
+private data class ModuleItem(
+    val title: String,
+    val icon: ImageVector,
+    val tint: Color,
+    val route: String
+)
+
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun AdminDashboardScreen(
     onNavigate: (String) -> Unit,
@@ -35,7 +52,7 @@ fun AdminDashboardScreen(
 ) {
     val state by viewModel.uiState.collectAsState()
     var searchQuery by remember { mutableStateOf("") }
-    var financeScope by remember { mutableStateOf("total") } // "total" or "today"
+    var financeScope by remember { mutableStateOf("total") }
     val dateStr = remember { SimpleDateFormat("EEEE, dd MMMM yyyy", Locale("bn", "BD")).format(Date()) }
 
     Scaffold(
@@ -43,7 +60,13 @@ fun AdminDashboardScreen(
             TopAppBar(
                 title = {
                     Column {
-                        Text(state.madrasaName, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                        Text(
+                            state.madrasaName,
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
                         Text(stringResource(R.string.dashboard_title), style = MaterialTheme.typography.bodySmall)
                     }
                 },
@@ -68,16 +91,16 @@ fun AdminDashboardScreen(
                 .padding(horizontal = 16.dp, vertical = 12.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            // 1. Contextual Hero Welcome Banner (matching PremiumDashboardClient.tsx)
+            // 1. Contextual Hero Welcome Banner (Responsive FlowRow)
             item {
                 OutlinedCard(
                     shape = RoundedCornerShape(20.dp),
                     border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
                 ) {
                     Column(modifier = Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                        Row(
+                        FlowRow(
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            verticalAlignment = Alignment.CenterVertically
+                            verticalArrangement = Arrangement.spacedBy(6.dp)
                         ) {
                             Surface(
                                 color = MaterialTheme.colorScheme.primaryContainer,
@@ -170,49 +193,21 @@ fun AdminDashboardScreen(
                 val totalMarked = d.today_present + d.today_absent
                 val attendancePct = if (totalMarked > 0) ((d.today_present.toFloat() / totalMarked) * 100).toInt() else 0
 
-                // 3. 4 Core Academic KPI Cards
+                val academicKpis = listOf(
+                    KpiItem("মোট শিক্ষার্থী", "${toBanglaNumber(d.students_count)} জন", Icons.Default.School, Color(0xFFECFDF5), Color(0xFF047857)),
+                    KpiItem("শিক্ষক ও স্টাফ", "${toBanglaNumber(d.teachers_count)} জন", Icons.Default.People, Color(0xFFEEF2FF), Color(0xFF4338CA)),
+                    KpiItem("সক্রিয় জামাত", "${toBanglaNumber(d.classes_count)} টি", Icons.Default.MenuBook, Color(0xFFFEF3C7), Color(0xFFB45309)),
+                    KpiItem("আজকের হাজিরা (${toBanglaNumber(attendancePct)}%)", "${toBanglaNumber(d.today_present)} / ${toBanglaNumber(d.today_absent)}", Icons.Default.HowToReg, Color(0xFFCCFBF1), Color(0xFF0F766E))
+                )
+
+                // 3. Responsive 1/2/4-column Academic KPIs
                 item {
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                        WebStyleKpiCard(
-                            title = "মোট শিক্ষার্থী",
-                            value = "${toBanglaNumber(d.students_count)} জন",
-                            icon = Icons.Default.School,
-                            badgeBg = Color(0xFFECFDF5),
-                            badgeTint = Color(0xFF047857),
-                            modifier = Modifier.weight(1f)
-                        )
-                        WebStyleKpiCard(
-                            title = "শিক্ষক ও স্টাফ",
-                            value = "${toBanglaNumber(d.teachers_count)} জন",
-                            icon = Icons.Default.People,
-                            badgeBg = Color(0xFFEEF2FF),
-                            badgeTint = Color(0xFF4338CA),
-                            modifier = Modifier.weight(1f)
-                        )
-                    }
-                }
-                item {
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                        WebStyleKpiCard(
-                            title = "সক্রিয় জামাত / শ্রেণি",
-                            value = "${toBanglaNumber(d.classes_count)} টি",
-                            icon = Icons.Default.MenuBook,
-                            badgeBg = Color(0xFFFEF3C7),
-                            badgeTint = Color(0xFFB45309),
-                            modifier = Modifier.weight(1f)
-                        )
-                        WebStyleKpiCard(
-                            title = "আজকের হাজিরা (${toBanglaNumber(attendancePct)}%)",
-                            value = "${toBanglaNumber(d.today_present)} / ${toBanglaNumber(d.today_absent)}",
-                            icon = Icons.Default.HowToReg,
-                            badgeBg = Color(0xFFCCFBF1),
-                            badgeTint = Color(0xFF0F766E),
-                            modifier = Modifier.weight(1f)
-                        )
+                    ResponsiveGrid(items = academicKpis) { item, mod ->
+                        WebStyleKpiCard(item, mod)
                     }
                 }
 
-                // 4. Finance Scope Toggle (সর্বমোট vs আজকের) + 3 Finance KPI Cards
+                // 4. Finance Scope Toggle (সর্বমোট vs আজকের) + Responsive Finance KPIs
                 item {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -221,16 +216,8 @@ fun AdminDashboardScreen(
                     ) {
                         Text("আর্থিক সারসংক্ষেপ", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                         Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                            FilterChip(
-                                selected = financeScope == "total",
-                                onClick = { financeScope = "total" },
-                                label = { Text("সর্বমোট") }
-                            )
-                            FilterChip(
-                                selected = financeScope == "today",
-                                onClick = { financeScope = "today" },
-                                label = { Text("আজকের") }
-                            )
+                            FilterChip(selected = financeScope == "total", onClick = { financeScope = "total" }, label = { Text("সর্বমোট") })
+                            FilterChip(selected = financeScope == "today", onClick = { financeScope = "today" }, label = { Text("আজকের") })
                         }
                     }
                 }
@@ -238,37 +225,18 @@ fun AdminDashboardScreen(
                 val activeIncome = if (financeScope == "today") d.today_income else d.total_income
                 val activeExpense = if (financeScope == "today") d.today_expense else d.total_expense
                 val activeNet = activeIncome - activeExpense
+                val savingsRate = if (activeIncome > 0) ((activeNet / activeIncome) * 100).toInt() else 0
+
+                val financeKpis = listOf(
+                    KpiItem(if (financeScope == "today") "আজকের আয়" else "মোট আয়", formatBanglaCurrency(activeIncome), Icons.Default.TrendingUp, Color(0xFFECFDF5), Color(0xFF047857)),
+                    KpiItem(if (financeScope == "today") "আজকের ব্যয়" else "মোট ব্যয়", formatBanglaCurrency(activeExpense), Icons.Default.TrendingDown, Color(0xFFFFF1F2), Color(0xFFBE123C)),
+                    KpiItem("নিট ব্যালেন্স (${toBanglaNumber(savingsRate)}%)", formatBanglaCurrency(activeNet), Icons.Default.AccountBalanceWallet, Color(0xFFCCFBF1), Color(0xFF0F766E))
+                )
 
                 item {
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        WebStyleKpiCard(
-                            title = if (financeScope == "today") "আজকের আয়" else "মোট আয়",
-                            value = formatBanglaCurrency(activeIncome),
-                            icon = Icons.Default.TrendingUp,
-                            badgeBg = Color(0xFFECFDF5),
-                            badgeTint = Color(0xFF047857),
-                            modifier = Modifier.weight(1f)
-                        )
-                        WebStyleKpiCard(
-                            title = if (financeScope == "today") "আজকের ব্যয়" else "মোট ব্যয়",
-                            value = formatBanglaCurrency(activeExpense),
-                            icon = Icons.Default.TrendingDown,
-                            badgeBg = Color(0xFFFFF1F2),
-                            badgeTint = Color(0xFFBE123C),
-                            modifier = Modifier.weight(1f)
-                        )
+                    ResponsiveGrid(items = financeKpis, maxColumnsTablet = 3) { item, mod ->
+                        WebStyleKpiCard(item, mod)
                     }
-                }
-                item {
-                    val savingsRate = if (activeIncome > 0) ((activeNet / activeIncome) * 100).toInt() else 0
-                    WebStyleKpiCard(
-                        title = "নিট তহবিল ব্যালেন্স (সঞ্চয় ${toBanglaNumber(savingsRate)}%)",
-                        value = formatBanglaCurrency(activeNet),
-                        icon = Icons.Default.AccountBalanceWallet,
-                        badgeBg = Color(0xFFCCFBF1),
-                        badgeTint = Color(0xFF0F766E),
-                        modifier = Modifier.fillMaxWidth()
-                    )
                 }
 
                 // 5. Charts
@@ -281,43 +249,24 @@ fun AdminDashboardScreen(
                 }
             }
 
-            // 6. Quick Modules Grid
+            // 6. Responsive Quick Modules Grid
             item {
                 Text("সকল মডিউল", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
             }
+
+            val modules = listOf(
+                ModuleItem(stringResource(R.string.students), Icons.Default.People, Color(0xFF047857), Routes.STUDENTS),
+                ModuleItem(stringResource(R.string.attendance), Icons.Default.FactCheck, Color(0xFF0F766E), Routes.ATTENDANCE),
+                ModuleItem(stringResource(R.string.hifz_kitab), Icons.Default.MenuBook, Color(0xFF4338CA), Routes.HIFZ_KITAB),
+                ModuleItem(stringResource(R.string.fees), Icons.Default.Payments, Color(0xFFB45309), Routes.FEES),
+                ModuleItem("পরীক্ষা ও ছুটি", Icons.Default.Assignment, Color(0xFF7C3AED), Routes.EXAMS),
+                ModuleItem("হিসাব ও যাকাত", Icons.Default.AccountBalance, Color(0xFFBE123C), Routes.FINANCE),
+                ModuleItem("বোর্ডিং ও লাইব্রেরি", Icons.Default.AdminPanelSettings, Color(0xFF334155), Routes.OPERATIONS)
+            )
+
             item {
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    ActionTile(stringResource(R.string.students), Icons.Default.People, Color(0xFF047857), Modifier.weight(1f)) {
-                        onNavigate(Routes.STUDENTS)
-                    }
-                    ActionTile(stringResource(R.string.attendance), Icons.Default.FactCheck, Color(0xFF0F766E), Modifier.weight(1f)) {
-                        onNavigate(Routes.ATTENDANCE)
-                    }
-                }
-            }
-            item {
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    ActionTile(stringResource(R.string.hifz_kitab), Icons.Default.MenuBook, Color(0xFF4338CA), Modifier.weight(1f)) {
-                        onNavigate(Routes.HIFZ_KITAB)
-                    }
-                    ActionTile(stringResource(R.string.fees), Icons.Default.Payments, Color(0xFFB45309), Modifier.weight(1f)) {
-                        onNavigate(Routes.FEES)
-                    }
-                }
-            }
-            item {
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    ActionTile("পরীক্ষা ও ছুটি", Icons.Default.Assignment, Color(0xFF7C3AED), Modifier.weight(1f)) {
-                        onNavigate(Routes.EXAMS)
-                    }
-                    ActionTile("হিসাব ও যাকাত", Icons.Default.AccountBalance, Color(0xFFBE123C), Modifier.weight(1f)) {
-                        onNavigate(Routes.FINANCE)
-                    }
-                }
-            }
-            item {
-                ActionTile("বোর্ডিং, লাইব্রেরি ও সিকিউরিটি", Icons.Default.AdminPanelSettings, Color(0xFF334155), Modifier.fillMaxWidth()) {
-                    onNavigate(Routes.OPERATIONS)
+                ResponsiveGrid(items = modules) { m, mod ->
+                    ActionTile(m.title, m.icon, m.tint, mod) { onNavigate(m.route) }
                 }
             }
         }
@@ -325,32 +274,37 @@ fun AdminDashboardScreen(
 }
 
 @Composable
-private fun WebStyleKpiCard(
-    title: String,
-    value: String,
-    icon: ImageVector,
-    badgeBg: Color,
-    badgeTint: Color,
-    modifier: Modifier = Modifier
-) {
+private fun WebStyleKpiCard(item: KpiItem, modifier: Modifier = Modifier) {
     ElevatedCard(modifier = modifier, shape = RoundedCornerShape(16.dp)) {
         Row(
             modifier = Modifier.padding(14.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             Box(
                 modifier = Modifier
-                    .size(40.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(badgeBg),
+                    .size(38.dp)
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(item.badgeBg),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(icon, contentDescription = null, tint = badgeTint, modifier = Modifier.size(20.dp))
+                Icon(item.icon, contentDescription = null, tint = item.badgeTint, modifier = Modifier.size(20.dp))
             }
             Column {
-                Text(title, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                Text(value, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                Text(
+                    item.title,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    item.value,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
             }
         }
     }
@@ -371,7 +325,13 @@ private fun ActionTile(
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             Icon(icon, contentDescription = title, tint = tint)
-            Text(title, fontWeight = FontWeight.SemiBold, style = MaterialTheme.typography.bodyMedium)
+            Text(
+                title,
+                fontWeight = FontWeight.SemiBold,
+                style = MaterialTheme.typography.bodyMedium,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
         }
     }
 }

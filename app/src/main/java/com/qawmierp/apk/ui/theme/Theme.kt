@@ -8,13 +8,22 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
+import com.qawmierp.apk.R
 
 private val EmeraldPrimary = Color(0xFF0F766E)
 private val EmeraldDark = Color(0xFF14B8A6)
 private val GoldSecondary = Color(0xFFB45309)
+
+val SolaimanLipiFontFamily = FontFamily(
+    Font(R.font.solaimanlipi, FontWeight.Normal),
+    Font(R.font.solaimanlipi, FontWeight.Medium),
+    Font(R.font.solaimanlipi_bold, FontWeight.SemiBold),
+    Font(R.font.solaimanlipi_bold, FontWeight.Bold)
+)
 
 private val LightColors = lightColorScheme(
     primary = EmeraldPrimary,
@@ -46,40 +55,50 @@ private val DarkColors = darkColorScheme(
     onSurfaceVariant = Color(0xFF94A3B8)
 )
 
-// Tuned lineHeight for crisp Bangla script rendering without matra/juktakkhor clipping
 private val QawmiTypography = Typography(
     headlineMedium = TextStyle(
-        fontFamily = FontFamily.SansSerif,
+        fontFamily = SolaimanLipiFontFamily,
         fontWeight = FontWeight.Bold,
         fontSize = 26.sp,
         lineHeight = 36.sp
     ),
     titleLarge = TextStyle(
-        fontFamily = FontFamily.SansSerif,
+        fontFamily = SolaimanLipiFontFamily,
         fontWeight = FontWeight.Bold,
         fontSize = 20.sp,
         lineHeight = 28.sp
     ),
     titleMedium = TextStyle(
-        fontFamily = FontFamily.SansSerif,
+        fontFamily = SolaimanLipiFontFamily,
         fontWeight = FontWeight.SemiBold,
         fontSize = 16.sp,
         lineHeight = 24.sp
     ),
     bodyLarge = TextStyle(
-        fontFamily = FontFamily.SansSerif,
+        fontFamily = SolaimanLipiFontFamily,
         fontSize = 15.sp,
         lineHeight = 24.sp
     ),
     bodyMedium = TextStyle(
-        fontFamily = FontFamily.SansSerif,
+        fontFamily = SolaimanLipiFontFamily,
         fontSize = 14.sp,
         lineHeight = 22.sp
     ),
     bodySmall = TextStyle(
-        fontFamily = FontFamily.SansSerif,
+        fontFamily = SolaimanLipiFontFamily,
         fontSize = 12.sp,
         lineHeight = 18.sp
+    ),
+    labelLarge = TextStyle(
+        fontFamily = SolaimanLipiFontFamily,
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 14.sp,
+        lineHeight = 20.sp
+    ),
+    labelSmall = TextStyle(
+        fontFamily = SolaimanLipiFontFamily,
+        fontSize = 11.sp,
+        lineHeight = 16.sp
     )
 )
 
