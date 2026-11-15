@@ -28,6 +28,7 @@ import com.qawmierp.apk.R
 import com.qawmierp.apk.core.i18n.formatBanglaCurrency
 import com.qawmierp.apk.core.i18n.toBanglaNumber
 import com.qawmierp.apk.ui.components.ResponsiveGrid
+import com.qawmierp.apk.ui.components.StudentPortalHeader
 import com.qawmierp.apk.ui.navigation.Routes
 
 private data class PortalKpi(
@@ -51,26 +52,11 @@ fun StudentPortalScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        stringResource(R.string.student_portal_title),
-                        fontWeight = FontWeight.Bold,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                },
-                actions = {
-                    IconButton(onClick = { viewModel.loadStudentPortal(state.data?.active_student?.id) }) {
-                        Icon(Icons.Default.Refresh, contentDescription = "Refresh")
-                    }
-                    IconButton(onClick = { onNavigate(Routes.NOTIFICATIONS) }) {
-                        Icon(Icons.Default.Notifications, contentDescription = null)
-                    }
-                    IconButton(onClick = { onNavigate(Routes.SETTINGS) }) {
-                        Icon(Icons.Default.Settings, contentDescription = null)
-                    }
-                }
+            StudentPortalHeader(
+                userFullName = state.data?.active_student?.full_name ?: state.userFullName,
+                photoUrl = state.data?.active_student?.photo_url,
+                onRefresh = { viewModel.loadStudentPortal(state.data?.active_student?.id) },
+                onNavigate = onNavigate
             )
         }
     ) { padding ->

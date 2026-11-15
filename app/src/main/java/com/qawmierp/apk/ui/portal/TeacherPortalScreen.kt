@@ -23,6 +23,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.qawmierp.apk.R
 import com.qawmierp.apk.core.i18n.toBanglaNumber
 import com.qawmierp.apk.ui.components.ResponsiveGrid
+import com.qawmierp.apk.ui.components.TeacherPortalHeader
 import com.qawmierp.apk.ui.navigation.Routes
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -49,26 +50,10 @@ fun TeacherPortalScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        stringResource(R.string.teacher_portal_title),
-                        fontWeight = FontWeight.Bold,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                },
-                actions = {
-                    IconButton(onClick = { viewModel.loadTeacherPortal() }) {
-                        Icon(Icons.Default.Refresh, contentDescription = "Refresh")
-                    }
-                    IconButton(onClick = { onNavigate(Routes.NOTIFICATIONS) }) {
-                        Icon(Icons.Default.Notifications, contentDescription = null)
-                    }
-                    IconButton(onClick = { onNavigate(Routes.SETTINGS) }) {
-                        Icon(Icons.Default.Settings, contentDescription = null)
-                    }
-                }
+            TeacherPortalHeader(
+                teacherName = state.data?.teacher?.full_name ?: state.userFullName,
+                onRefresh = { viewModel.loadTeacherPortal() },
+                onNavigate = onNavigate
             )
         }
     ) { padding ->

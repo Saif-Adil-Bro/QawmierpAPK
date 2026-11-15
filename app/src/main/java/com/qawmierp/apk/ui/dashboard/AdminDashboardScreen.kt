@@ -23,6 +23,7 @@ import com.qawmierp.apk.R
 import com.qawmierp.apk.core.i18n.formatBanglaCurrency
 import com.qawmierp.apk.core.i18n.toBanglaNumber
 import com.qawmierp.apk.core.i18n.translateRoleToBangla
+import com.qawmierp.apk.ui.components.AdminPanelHeader
 import com.qawmierp.apk.ui.components.ResponsiveGrid
 import com.qawmierp.apk.ui.navigation.Routes
 import java.text.SimpleDateFormat
@@ -57,30 +58,12 @@ fun AdminDashboardScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = {
-                    Column {
-                        Text(
-                            state.madrasaName,
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                        Text(stringResource(R.string.dashboard_title), style = MaterialTheme.typography.bodySmall)
-                    }
-                },
-                actions = {
-                    IconButton(onClick = { viewModel.loadDashboard() }) {
-                        Icon(Icons.Default.Refresh, contentDescription = "Refresh")
-                    }
-                    IconButton(onClick = { onNavigate(Routes.NOTIFICATIONS) }) {
-                        Icon(Icons.Default.Notifications, contentDescription = stringResource(R.string.notifications))
-                    }
-                    IconButton(onClick = { onNavigate(Routes.SETTINGS) }) {
-                        Icon(Icons.Default.Settings, contentDescription = stringResource(R.string.settings))
-                    }
-                }
+            AdminPanelHeader(
+                madrasaName = state.madrasaName,
+                userFullName = state.userFullName,
+                userRole = state.userRole,
+                onRefresh = { viewModel.loadDashboard() },
+                onNavigate = onNavigate
             )
         }
     ) { padding ->
