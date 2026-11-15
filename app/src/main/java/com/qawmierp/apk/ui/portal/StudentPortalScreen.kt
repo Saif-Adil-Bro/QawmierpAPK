@@ -1,20 +1,31 @@
 package com.qawmierp.apk.ui.portal
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.AsyncImage
 import com.qawmierp.apk.R
+import com.qawmierp.apk.core.i18n.formatBanglaCurrency
+import com.qawmierp.apk.core.i18n.toBanglaNumber
 import com.qawmierp.apk.ui.navigation.Routes
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -32,8 +43,11 @@ fun StudentPortalScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.student_portal_title)) },
+                title = { Text(stringResource(R.string.student_portal_title), fontWeight = FontWeight.Bold) },
                 actions = {
+                    IconButton(onClick = { viewModel.loadStudentPortal(state.data?.active_student?.id) }) {
+                        Icon(Icons.Default.Refresh, contentDescription = "Refresh")
+                    }
                     IconButton(onClick = { onNavigate(Routes.NOTIFICATIONS) }) {
                         Icon(Icons.Default.Notifications, contentDescription = null)
                     }
@@ -48,8 +62,8 @@ fun StudentPortalScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
             if (state.isOfflineCache) {
                 item {
@@ -66,35 +80,166 @@ fun StudentPortalScreen(
             }
 
             state.data?.let { portal ->
+                // 1. Multi-child Switcher Bar (matching app/portal/page.tsx)
                 if (portal.students.size > 1) {
                     item {
-                        LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            items(portal.students) { child ->
-                                FilterChip(
-                                    selected = child.id == portal.active_student?.id,
-                                    onClick = { viewModel.loadStudentPortal(child.id) },
-                                    label = { Text(child.full_name) }
+                        OutlinedCard(shape = RoundedCornerShape(16.dp)) {
+                            Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                Text(
+                                    "সন্তান নির্বাচন করুন (${toBanglaNumber(portal.students.size)} জন নিবন্ধিত):",
+                                    style = MaterialTheme.typography.labelLarge,
+                                    fontWeight = FontWeight.Bold
                                 )
+                                LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    items(portal.students) { child ->
+                                        val selected = child.id == portal.active_student?.id
+                                        FilterChip(
+                                            selected = selected,
+                                            onClick = { viewModel.loadStudentPortal(child.id) },
+                                            label = {
+                                                Text("${child.full_name} (রোল: ${toBanglaNumber(child.roll_number ?: "-")})")
+                                            }
+                                        )
+                                    }
+                                }
                             }
                         }
                     }
                 }
 
+                // 2. Child Profile Hero Banner (Emerald-Teal-Slate gradient matching web)
                 portal.active_student?.let { student ->
                     item {
-                        ElevatedCard(modifier = Modifier.fillMaxWidth()) {
-                            Column(modifier = Modifier.padding(16.dp)) {
-                                Text(student.full_name, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-                                Text("রোল: ${student.roll_number ?: "-"} | আইডি: ${student.student_id_code ?: "-"}")
-                                Text("ক্লাস: ${student.classes?.name ?: "-"}")
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(24.dp))
+                                .background(
+                                    Brush.horizontalGradient(
+                                        colors = listOf(Color(0xFF064E3B), Color(0xFF115E59), Color(0xFF0F172A))
+                                    )
+                                )
+                                .padding(20.dp)
+                        ) {
+                            Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(14.dp)
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(64.dp)
+                                            .clip(RoundedCornerShape(16.dp))
+                                            .background(Color.White.copy(alpha = 0.15f))
+                                            .border(1.dp, Color.White.copy(alpha = 0.25f), RoundedCornerShape(16.dp)),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        if (!student.photo_url.isNullOrBlank()) {
+                                            AsyncImage(
+                                                model = student.photo_url,
+                                                contentDescription = student.full_name,
+                                                contentScale = ContentScale.Crop,
+                                                modifier = Modifier.fillMaxSize()
+                                            )
+                                        } else {
+                                            Text(
+                                                text = student.full_name.take(1),
+                                                style = MaterialTheme.typography.headlineMedium,
+                                                color = Color.White,
+                                                fontWeight = FontWeight.Bold
+                                            )
+                                        }
+                                    }
+
+                                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                        Surface(
+                                            color = Color(0xFF10B981).copy(alpha = 0.25f),
+                                            shape = CircleShape
+                                        ) {
+                                            Text(
+                                                "● নিয়মিত শিক্ষার্থী",
+                                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 3.dp),
+                                                style = MaterialTheme.typography.labelSmall,
+                                                color = Color(0xFFA7F3D0),
+                                                fontWeight = FontWeight.Bold
+                                            )
+                                        }
+                                        Text(
+                                            student.full_name,
+                                            style = MaterialTheme.typography.titleLarge,
+                                            color = Color.White,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                        Text(
+                                            "আইডি: ${student.student_id_code ?: "-"} • রোল: ${toBanglaNumber(student.roll_number ?: "-")}",
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = Color(0xFFD1FAE5)
+                                        )
+                                        Text(
+                                            "জামাত / শ্রেণি: ${student.classes?.name ?: "-"}",
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = Color(0xFFA7F3D0)
+                                        )
+                                    }
+                                }
+
+                                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                                    OutlinedButton(
+                                        onClick = { onNavigate(Routes.FEES) },
+                                        colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White),
+                                        modifier = Modifier.weight(1f)
+                                    ) {
+                                        Icon(Icons.Default.CreditCard, contentDescription = null, modifier = Modifier.size(16.dp))
+                                        Spacer(modifier = Modifier.width(6.dp))
+                                        Text("ফি ও রসিদ")
+                                    }
+                                    Button(
+                                        onClick = { onNavigate(Routes.EXAMS) },
+                                        colors = ButtonDefaults.buttonColors(
+                                            containerColor = Color(0xFF10B981),
+                                            contentColor = Color(0xFF022C22)
+                                        ),
+                                        modifier = Modifier.weight(1f)
+                                    ) {
+                                        Icon(Icons.Default.EmojiEvents, contentDescription = null, modifier = Modifier.size(16.dp))
+                                        Spacer(modifier = Modifier.width(6.dp))
+                                        Text("ফলাফল শিট", fontWeight = FontWeight.Bold)
+                                    }
+                                }
                             }
                         }
                     }
                 }
 
-                item { Text("সাম্প্রতিক হাজিরা (${portal.attendance.size})", fontWeight = FontWeight.SemiBold) }
+                // 3. Portal KPI Cards
+                val totalDays = portal.attendance.size
+                val presentDays = portal.attendance.count { it.status.equals("present", ignoreCase = true) }
+                val rate = if (totalDays > 0) ((presentDays.toFloat() / totalDays) * 100).toInt() else 100
+                val totalDue = portal.fees.filter { !it.status.equals("paid", ignoreCase = true) }.sumOf { it.amount - it.paid_amount }
+
+                item {
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                        ElevatedCard(modifier = Modifier.weight(1f), shape = RoundedCornerShape(16.dp)) {
+                            Column(modifier = Modifier.padding(14.dp)) {
+                                Text("উপস্থিতির হার", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Text("${toBanglaNumber(rate)}%", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = Color(0xFF047857))
+                                Text("মোট ${toBanglaNumber(totalDays)} দিন", style = MaterialTheme.typography.labelSmall)
+                            }
+                        }
+                        ElevatedCard(modifier = Modifier.weight(1f), shape = RoundedCornerShape(16.dp)) {
+                            Column(modifier = Modifier.padding(14.dp)) {
+                                Text("বকেয়া ফি", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Text(formatBanglaCurrency(totalDue), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = if (totalDue > 0) Color(0xFFBE123C) else Color(0xFF047857))
+                                Text("${toBanglaNumber(portal.fees.size)} টি এন্ট্রি", style = MaterialTheme.typography.labelSmall)
+                            }
+                        }
+                    }
+                }
+
+                // 4. Recent Attendance, Hifz, Fees & Notices
+                item { Text("সাম্প্রতিক হাজিরা (${toBanglaNumber(portal.attendance.size)})", fontWeight = FontWeight.Bold) }
                 items(portal.attendance.take(5)) { att ->
-                    OutlinedCard(modifier = Modifier.fillMaxWidth()) {
+                    OutlinedCard(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp)) {
                         Row(modifier = Modifier.padding(12.dp), horizontalArrangement = Arrangement.SpaceBetween) {
                             Text(att.date)
                             Spacer(modifier = Modifier.weight(1f))
@@ -103,9 +248,9 @@ fun StudentPortalScreen(
                     }
                 }
 
-                item { Text("হিফজ লগ (${portal.hifz_logs.size})", fontWeight = FontWeight.SemiBold) }
+                item { Text("হিফজ ও সবক লগ (${toBanglaNumber(portal.hifz_logs.size)})", fontWeight = FontWeight.Bold) }
                 items(portal.hifz_logs.take(5)) { hifz ->
-                    OutlinedCard(modifier = Modifier.fillMaxWidth()) {
+                    OutlinedCard(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp)) {
                         Column(modifier = Modifier.padding(12.dp)) {
                             Text("${hifz.date} — সবক: ${hifz.sabak ?: "-"}", fontWeight = FontWeight.Medium)
                             Text("সবকী: ${hifz.sabqi ?: "-"} | মনজিল: ${hifz.manzil ?: "-"}", style = MaterialTheme.typography.bodySmall)
@@ -113,22 +258,22 @@ fun StudentPortalScreen(
                     }
                 }
 
-                item { Text("বকেয়া ও ফি (${portal.fees.size})", fontWeight = FontWeight.SemiBold) }
-                items(portal.fees.take(5)) { fee ->
-                    OutlinedCard(modifier = Modifier.fillMaxWidth()) {
+                item { Text("পরীক্ষার ফলাফল (${toBanglaNumber(portal.exam_results.size)})", fontWeight = FontWeight.Bold) }
+                items(portal.exam_results.take(5)) { res ->
+                    OutlinedCard(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp)) {
                         Row(modifier = Modifier.padding(12.dp)) {
                             Column(modifier = Modifier.weight(1f)) {
-                                Text(fee.title ?: "মাসিক ফি", fontWeight = FontWeight.Medium)
-                                Text("Status: ${fee.status}", style = MaterialTheme.typography.bodySmall)
+                                Text(res.subject_name ?: "বিষয়", fontWeight = FontWeight.Bold)
+                                Text(res.exam_name ?: "পরীক্ষা", style = MaterialTheme.typography.bodySmall)
                             }
-                            Text("৳${fee.amount.toInt()}", fontWeight = FontWeight.Bold)
+                            Text("${toBanglaNumber(res.marks_obtained?.toInt() ?: 0)} (${res.grade ?: "-"})", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
                         }
                     }
                 }
 
-                item { Text("নোটিশ (${portal.notices.size})", fontWeight = FontWeight.SemiBold) }
+                item { Text("নোটিশ বোর্ড (${toBanglaNumber(portal.notices.size)})", fontWeight = FontWeight.Bold) }
                 items(portal.notices.take(5)) { notice ->
-                    OutlinedCard(modifier = Modifier.fillMaxWidth()) {
+                    OutlinedCard(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp)) {
                         Column(modifier = Modifier.padding(12.dp)) {
                             Text(notice.title, fontWeight = FontWeight.Bold)
                             notice.content?.let { Text(it, style = MaterialTheme.typography.bodySmall) }

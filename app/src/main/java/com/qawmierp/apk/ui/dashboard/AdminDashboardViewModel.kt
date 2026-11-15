@@ -21,7 +21,9 @@ data class DashboardUiState(
     val dashboard: DashboardDto? = null,
     val searchResults: UniversalSearchDto? = null,
     val error: String? = null,
-    val madrasaName: String = "QawmiERP V2.0"
+    val madrasaName: String = "আপনার মাদরাসা",
+    val userFullName: String = "মুহতামিম",
+    val userRole: String = "super_admin"
 )
 
 @HiltViewModel
@@ -32,7 +34,11 @@ class AdminDashboardViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(
-        DashboardUiState(madrasaName = sessionManager.getMadrasa()?.name ?: "QawmiERP V2.0")
+        DashboardUiState(
+            madrasaName = sessionManager.getMadrasa()?.name ?: "আপনার মাদরাসা",
+            userFullName = sessionManager.getUser()?.full_name?.takeIf { it.isNotBlank() } ?: "মুহতামিম",
+            userRole = sessionManager.getUser()?.role ?: "super_admin"
+        )
     )
     val uiState: StateFlow<DashboardUiState> = _uiState.asStateFlow()
 
