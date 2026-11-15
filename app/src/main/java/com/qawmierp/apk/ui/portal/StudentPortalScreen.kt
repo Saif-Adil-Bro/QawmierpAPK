@@ -227,29 +227,101 @@ fun StudentPortalScreen(
                     }
                 }
 
-                // 3. Responsive 4 Portal KPI Cards (1/2/4 columns)
+                // 3. Responsive 4 Rich Portal KPI Cards (Exact app/portal/page.tsx parity)
                 val totalDays = portal.attendance.size
                 val presentDays = portal.attendance.count { it.status.equals("present", ignoreCase = true) }
+                val absentDays = portal.attendance.count { it.status.equals("absent", ignoreCase = true) }
                 val rate = if (totalDays > 0) ((presentDays.toFloat() / totalDays) * 100).toInt() else 100
                 val totalDue = portal.fees.filter { !it.status.equals("paid", ignoreCase = true) }.sumOf { it.amount - it.paid_amount }
-                val latestSabak = portal.hifz_logs.firstOrNull()?.sabak ?: "—"
-
-                val kpis = listOf(
-                    PortalKpi("উপস্থিতির হার", "${toBanglaNumber(rate)}%", "মোট ${toBanglaNumber(totalDays)} দিন", Color(0xFF047857)),
-                    PortalKpi("বকেয়া ফি", formatBanglaCurrency(totalDue), "${toBanglaNumber(portal.fees.size)} টি এন্ট্রি", if (totalDue > 0) Color(0xFFBE123C) else Color(0xFF047857)),
-                    PortalKpi("সর্বশেষ সবক", latestSabak, "${toBanglaNumber(portal.hifz_logs.size)} টি লগ", Color(0xFF4338CA)),
-                    PortalKpi("নোটিশ বোর্ড", "${toBanglaNumber(portal.notices.size)} টি", "সাম্প্রতিক ঘোষণা", Color(0xFFB45309))
-                )
+                val totalPaid = portal.fees.sumOf { it.paid_amount }
+                val latestSabak = portal.hifz_logs.firstOrNull()?.sabak ?: "দৈনিক সবক চলমান"
+                val latestGrade = portal.exam_results.firstOrNull()?.grade ?: "A+"
+                val latestExamName = portal.exam_results.firstOrNull()?.exam_name ?: "সাময়িক পরীক্ষা"
 
                 item {
-                    ResponsiveGrid(items = kpis) { kpi, mod ->
-                        ElevatedCard(modifier = mod, shape = RoundedCornerShape(16.dp)) {
-                            Column(modifier = Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                                Text(kpi.title, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                                Text(kpi.value, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = kpi.valueColor, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                                Text(kpi.subtitle, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    val cards: List<@Composable (Modifier) -> Unit> = listOf(
+                        { mod ->
+                            OutlinedCard(onClick = { onNavigate(Routes.ATTENDANCE) }, modifier = mod, shape = RoundedCornerShape(16.dp)) {
+                                Column(modifier = Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                                        Text("উপস্থিতির হার", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, fontWeight = FontWeight.Bold)
+                                        Box(modifier = Modifier.size(32.dp).clip(RoundedCornerShape(10.dp)).background(Color(0xFFECFDF5)), contentAlignment = Alignment.Center) {
+                                            Icon(Icons.Default.CalendarMonth, contentDescription = null, tint = Color(0xFF059669), modifier = Modifier.size(16.dp))
+                                        }
+                                    }
+                                    Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                        Text("${toBanglaNumber(rate)}%", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.ExtraBold)
+                                        Text("সন্তোষজনক", style = MaterialTheme.typography.labelSmall, color = Color(0xFF059669), fontWeight = FontWeight.SemiBold)
+                                    }
+                                    LinearProgressIndicator(
+                                        progress = { (rate.coerceIn(0, 100)) / 100f },
+                                        modifier = Modifier.fillMaxWidth().height(6.dp).clip(RoundedCornerShape(4.dp)),
+                                        color = Color(0xFF10B981),
+                                        trackColor = MaterialTheme.colorScheme.surfaceVariant
+                                    )
+                                    Text("উপস্থিত: ${toBanglaNumber(presentDays)} • অনুপস্থিত: ${toBanglaNumber(absentDays)}", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                }
+                            }
+                        },
+                        { mod ->
+                            OutlinedCard(onClick = { onNavigate(Routes.HIFZ_KITAB) }, modifier = mod, shape = RoundedCornerShape(16.dp)) {
+                                Column(modifier = Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                                        Text("চলমান সবক (হিফজ)", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                        Box(modifier = Modifier.size(32.dp).clip(RoundedCornerShape(10.dp)).background(Color(0xFFF0FDFA)), contentAlignment = Alignment.Center) {
+                                            Icon(Icons.Default.MenuBook, contentDescription = null, tint = Color(0xFF0D9488), modifier = Modifier.size(16.dp))
+                                        }
+                                    }
+                                    Text(latestSabak, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                    Surface(color = Color(0xFFFFFBEB), shape = RoundedCornerShape(8.dp)) {
+                                        Row(modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                                            Icon(Icons.Default.Star, contentDescription = null, tint = Color(0xFFF59E0B), modifier = Modifier.size(13.dp))
+                                            Text("মোট ${toBanglaNumber(portal.hifz_logs.size)} টি লগ", style = MaterialTheme.typography.labelSmall, color = Color(0xFFD97706), fontWeight = FontWeight.Bold)
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        { mod ->
+                            OutlinedCard(onClick = { onNavigate(Routes.FEES) }, modifier = mod, shape = RoundedCornerShape(16.dp)) {
+                                Column(modifier = Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                                        Text(if (totalDue > 0) "বকেয়া ফি" else "পরিশোধিত ফি", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, fontWeight = FontWeight.Bold)
+                                        Box(modifier = Modifier.size(32.dp).clip(RoundedCornerShape(10.dp)).background(Color(0xFFEFF6FF)), contentAlignment = Alignment.Center) {
+                                            Icon(Icons.Default.CreditCard, contentDescription = null, tint = Color(0xFF2563EB), modifier = Modifier.size(16.dp))
+                                        }
+                                    }
+                                    Text(
+                                        formatBanglaCurrency(if (totalDue > 0) totalDue else totalPaid),
+                                        style = MaterialTheme.typography.titleLarge,
+                                        fontWeight = FontWeight.ExtraBold,
+                                        color = if (totalDue > 0) Color(0xFFBE123C) else Color(0xFF047857)
+                                    )
+                                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                                        Icon(Icons.Default.CheckCircle, contentDescription = null, tint = Color(0xFF059669), modifier = Modifier.size(13.dp))
+                                        Text("${toBanglaNumber(portal.fees.size)} টি ফি রসিদ", style = MaterialTheme.typography.labelSmall, color = Color(0xFF059669), fontWeight = FontWeight.SemiBold)
+                                    }
+                                }
+                            }
+                        },
+                        { mod ->
+                            OutlinedCard(onClick = { onNavigate(Routes.EXAMS) }, modifier = mod, shape = RoundedCornerShape(16.dp)) {
+                                Column(modifier = Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                                        Text("পরীক্ষার গ্রেড", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, fontWeight = FontWeight.Bold)
+                                        Box(modifier = Modifier.size(32.dp).clip(RoundedCornerShape(10.dp)).background(Color(0xFFFAF5FF)), contentAlignment = Alignment.Center) {
+                                            Icon(Icons.Default.EmojiEvents, contentDescription = null, tint = Color(0xFF9333EA), modifier = Modifier.size(16.dp))
+                                        }
+                                    }
+                                    Text(latestGrade, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.ExtraBold, color = Color(0xFF7E22CE))
+                                    Text(latestExamName, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                    Text("মার্কশিট দেখুন ›", style = MaterialTheme.typography.labelSmall, color = Color(0xFF9333EA), fontWeight = FontWeight.Bold)
+                                }
                             }
                         }
+                    )
+                    ResponsiveGrid(items = cards) { renderCard, mod ->
+                        renderCard(mod)
                     }
                 }
 

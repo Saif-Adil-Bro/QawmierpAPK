@@ -142,39 +142,103 @@ fun TeacherPortalScreen(
                     }
                 }
 
-                // 2. Responsive 4 Teacher KPI Cards (1/2/4 columns)
-                val teacherKpis = listOf(
-                    TeacherKpi("বরাদ্দকৃত কিতাব", "${toBanglaNumber(portal.assigned_subjects.size)} টি", Color(0xFF047857)),
-                    TeacherKpi("ক্লাস রুটিন", "${toBanglaNumber(portal.routines.size)} টি", Color(0xFF4338CA)),
-                    TeacherKpi("নির্ধারিত শ্রেণি", "${toBanglaNumber(portal.classes.size)} টি", Color(0xFF0F766E)),
-                    TeacherKpi("নোটিশ", "${toBanglaNumber(portal.notices.size)} টি", Color(0xFF7C3AED))
-                )
-
+                // 2. Responsive 4 Teacher KPI Cards (Exact app/teacher-portal/page.tsx parity)
                 item {
-                    ResponsiveGrid(items = teacherKpis) { kpi, mod ->
-                        ElevatedCard(modifier = mod, shape = RoundedCornerShape(16.dp)) {
-                            Column(modifier = Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                                Text(kpi.title, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                                Text(kpi.value, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = kpi.color, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    val kpis = listOf(
+                        Triple("বরাদ্দকৃত কিতাব", "${toBanglaNumber(portal.assigned_subjects.size)} টি", Icons.Default.MenuBook to (Color(0xFFECFDF5) to Color(0xFF047857))),
+                        Triple("ক্লাস রুটিন", "${toBanglaNumber(portal.routines.size)} টি", Icons.Default.Schedule to (Color(0xFFEEF2FF) to Color(0xFF4338CA))),
+                        Triple("নির্ধারিত শ্রেণি", "${toBanglaNumber(portal.classes.size)} টি", Icons.Default.CalendarMonth to (Color(0xFFF0FDFA) to Color(0xFF0F766E))),
+                        Triple("নোটিশ", "${toBanglaNumber(portal.notices.size)} টি", Icons.Default.Notifications to (Color(0xFFFAF5FF) to Color(0xFF7C3AED)))
+                    )
+                    ResponsiveGrid(items = kpis) { (title, value, iconPair), mod ->
+                        val (icon, colors) = iconPair
+                        val (bg, tint) = colors
+                        OutlinedCard(modifier = mod, shape = RoundedCornerShape(16.dp)) {
+                            Row(
+                                modifier = Modifier.padding(14.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(10.dp)
+                            ) {
+                                Box(
+                                    modifier = Modifier.size(38.dp).clip(RoundedCornerShape(10.dp)).background(bg),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(icon, contentDescription = null, tint = tint, modifier = Modifier.size(18.dp))
+                                }
+                                Column {
+                                    Text(title, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                    Text(value, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = tint, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                }
                             }
                         }
                     }
                 }
 
-                // 3. Routine Card
+                // 3. Routine Card (Exact time & class pill styling)
                 item {
-                    Text("পাঠদান রুটিন ও সময়সূচি (${toBanglaNumber(portal.routines.size)})", fontWeight = FontWeight.Bold)
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        Icon(Icons.Default.Schedule, contentDescription = null, tint = Color(0xFF4F46E5), modifier = Modifier.size(18.dp))
+                        Text("পাঠদান রুটিন ও সময়সূচি (${toBanglaNumber(portal.routines.size)})", fontWeight = FontWeight.Bold)
+                    }
                 }
                 items(portal.routines) { routine ->
-                    OutlinedCard(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp)) {
-                        Column(modifier = Modifier.padding(12.dp)) {
-                            Text("${routine.class_name ?: "-"} • ${routine.subject_name ?: "-"}", fontWeight = FontWeight.Bold)
-                            Text("${routine.day_of_week ?: ""} (${routine.start_time ?: ""} - ${routine.end_time ?: ""})", style = MaterialTheme.typography.bodySmall)
+                    OutlinedCard(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(14.dp)) {
+                        Column(modifier = Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                                Surface(color = Color(0xFFE0E7FF), shape = RoundedCornerShape(6.dp)) {
+                                    Text(
+                                        "${toBanglaNumber(routine.start_time ?: "")} - ${toBanglaNumber(routine.end_time ?: "")}",
+                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = Color(0xFF3730A3),
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
+                                Surface(color = Color(0xFFD1FAE5), shape = RoundedCornerShape(6.dp)) {
+                                    Text(
+                                        routine.class_name ?: "-",
+                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = Color(0xFF065F46),
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
+                            }
+                            Text(routine.subject_name ?: "-", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleSmall)
+                            routine.day_of_week?.let {
+                                Text("বার: $it", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
                         }
                     }
                 }
 
-                // 4. Assigned Classes & Notices
+                // 4. Daily Teacher Modules Grid
+                item {
+                    Text("দৈনিক শিক্ষক মডিউলসমূহ", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                }
+                item {
+                    val teacherModules = listOf(
+                        Triple("দৈনিক হাজিরা গ্রহণ", Icons.Default.FactCheck, Color(0xFF047857) to Routes.ATTENDANCE),
+                        Triple("সবক ও কিতাব এন্ট্রি", Icons.Default.MenuBook, Color(0xFF0F766E) to Routes.HIFZ_KITAB),
+                        Triple("পরীক্ষা ও নম্বর এন্ট্রি", Icons.Default.Assignment, Color(0xFF4338CA) to Routes.EXAMS),
+                        Triple("নোটিশ বোর্ড", Icons.Default.Notifications, Color(0xFF7C3AED) to Routes.NOTIFICATIONS)
+                    )
+                    ResponsiveGrid(items = teacherModules) { (title, icon, pair), mod ->
+                        val (tint, route) = pair
+                        OutlinedCard(onClick = { onNavigate(route) }, modifier = mod, shape = RoundedCornerShape(14.dp)) {
+                            Row(
+                                modifier = Modifier.padding(14.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(10.dp)
+                            ) {
+                                Icon(icon, contentDescription = title, tint = tint)
+                                Text(title, fontWeight = FontWeight.SemiBold, style = MaterialTheme.typography.bodyMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                            }
+                        }
+                    }
+                }
+
+                // 5. Assigned Classes & Notices
                 item { Text("নির্ধারিত ক্লাসসমূহ (${toBanglaNumber(portal.classes.size)})", fontWeight = FontWeight.Bold) }
                 items(portal.classes) { cls ->
                     OutlinedCard(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp)) {

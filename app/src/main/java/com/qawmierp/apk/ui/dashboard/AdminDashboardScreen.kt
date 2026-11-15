@@ -35,7 +35,22 @@ private data class KpiItem(
     val value: String,
     val icon: ImageVector,
     val badgeBg: Color,
-    val badgeTint: Color
+    val badgeTint: Color,
+    val footerLabel: String,
+    val route: String,
+    val progressPct: Int? = null
+)
+
+private data class FinanceKpiItem(
+    val title: String,
+    val badgeText: String,
+    val badgeBg: Color,
+    val badgeTint: Color,
+    val amount: String,
+    val amountColor: Color,
+    val subtitle: String,
+    val actionLabel: String?,
+    val route: String
 )
 
 private data class ModuleItem(
@@ -54,7 +69,15 @@ fun AdminDashboardScreen(
     val state by viewModel.uiState.collectAsState()
     var searchQuery by remember { mutableStateOf("") }
     var financeScope by remember { mutableStateOf("total") }
-    val dateStr = remember { SimpleDateFormat("EEEE, dd MMMM yyyy", Locale("bn", "BD")).format(Date()) }
+    var now by remember { mutableStateOf(Date()) }
+    LaunchedEffect(Unit) {
+        while (true) {
+            kotlinx.coroutines.delay(60_000L)
+            now = Date()
+        }
+    }
+    val dateStr = remember(now) { SimpleDateFormat("EEEE, dd MMMM yyyy", Locale("bn", "BD")).format(now) }
+    val timeStr = remember(now) { SimpleDateFormat("hh:mm a", Locale("bn", "BD")).format(now) }
 
     Scaffold(
         topBar = {
@@ -74,53 +97,123 @@ fun AdminDashboardScreen(
                 .padding(horizontal = 16.dp, vertical = 12.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            // 1. Contextual Hero Welcome Banner (Responsive FlowRow)
+            // 1. Contextual Hero Welcome Banner (Exact PremiumDashboardClient.tsx parity)
             item {
                 OutlinedCard(
                     shape = RoundedCornerShape(20.dp),
                     border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
                 ) {
-                    Column(modifier = Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Column(modifier = Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         FlowRow(
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                             verticalArrangement = Arrangement.spacedBy(6.dp)
                         ) {
                             Surface(
-                                color = MaterialTheme.colorScheme.primaryContainer,
-                                shape = RoundedCornerShape(8.dp)
+                                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f),
+                                shape = RoundedCornerShape(8.dp),
+                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
                             ) {
                                 Row(
                                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                                     horizontalArrangement = Arrangement.spacedBy(4.dp),
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    Icon(Icons.Default.Apartment, contentDescription = null, modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.primary)
-                                    Text(state.madrasaName, style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold)
+                                    Icon(Icons.Default.Apartment, contentDescription = null, modifier = Modifier.size(14.dp), tint = Color(0xFF059669))
+                                    Text(state.madrasaName, style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.SemiBold)
                                 }
                             }
                             Surface(
-                                color = Color(0xFFECFDF5),
-                                shape = RoundedCornerShape(8.dp)
+                                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f),
+                                shape = RoundedCornerShape(8.dp),
+                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
                             ) {
                                 Row(
                                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                                     horizontalArrangement = Arrangement.spacedBy(4.dp),
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    Icon(Icons.Default.VerifiedUser, contentDescription = null, modifier = Modifier.size(14.dp), tint = Color(0xFF047857))
-                                    Text(translateRoleToBangla(state.userRole), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = Color(0xFF047857))
+                                    Icon(Icons.Default.CalendarToday, contentDescription = null, modifier = Modifier.size(13.dp), tint = Color(0xFF059669))
+                                    Text(dateStr, style = MaterialTheme.typography.labelSmall)
+                                }
+                            }
+                            Surface(
+                                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f),
+                                shape = RoundedCornerShape(8.dp),
+                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(Icons.Default.Schedule, contentDescription = null, modifier = Modifier.size(13.dp), tint = Color(0xFFF59E0B))
+                                    Text(timeStr, style = MaterialTheme.typography.labelSmall)
                                 }
                             }
                         }
 
-                        Text(
-                            text = "স্বাগতম, ${state.userFullName}",
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                            Icon(Icons.Default.CalendarToday, contentDescription = null, modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
-                            Text(dateStr, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                            Text(
+                                text = "আস-সালামু আলাইকুম, ${state.userFullName}",
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.ExtraBold
+                            )
+                            FlowRow(
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                Text(
+                                    text = "প্রাতিষ্ঠানিক ও আর্থিক কার্যক্রমের রিয়েল-টাইম সারসংক্ষেপ।",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                                Surface(
+                                    color = Color(0xFFECFDF5),
+                                    shape = RoundedCornerShape(6.dp),
+                                    border = BorderStroke(1.dp, Color(0xFFA7F3D0))
+                                ) {
+                                    Row(
+                                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                                        horizontalArrangement = Arrangement.spacedBy(3.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Icon(Icons.Default.VerifiedUser, contentDescription = null, modifier = Modifier.size(12.dp), tint = Color(0xFF047857))
+                                        Text(translateRoleToBangla(state.userRole), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.SemiBold, color = Color(0xFF047857))
+                                    }
+                                }
+                            }
+                        }
+
+                        // 3 Interactive Quick Actions
+                        FlowRow(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Button(
+                                onClick = { onNavigate(Routes.ATTENDANCE) },
+                                shape = RoundedCornerShape(12.dp),
+                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF059669), contentColor = Color.White)
+                            ) {
+                                Icon(Icons.Default.CheckBox, contentDescription = null, modifier = Modifier.size(16.dp))
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text("হাজিরা গ্রহণ", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
+                            }
+                            OutlinedButton(
+                                onClick = { onNavigate(Routes.HIFZ_KITAB) },
+                                shape = RoundedCornerShape(12.dp)
+                            ) {
+                                Icon(Icons.Default.MenuBook, contentDescription = null, modifier = Modifier.size(16.dp), tint = Color(0xFF059669))
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text("দৈনিক পড়া ও সবক", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
+                            }
+                            OutlinedButton(
+                                onClick = { onNavigate(Routes.FEES) },
+                                shape = RoundedCornerShape(12.dp)
+                            ) {
+                                Icon(Icons.Default.Payments, contentDescription = null, modifier = Modifier.size(16.dp), tint = Color(0xFFD97706))
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text("ফি আদায়", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
+                            }
                         }
                     }
                 }
@@ -177,27 +270,20 @@ fun AdminDashboardScreen(
                 val attendancePct = if (totalMarked > 0) ((d.today_present.toFloat() / totalMarked) * 100).toInt() else 0
 
                 val academicKpis = listOf(
-                    KpiItem("মোট শিক্ষার্থী", "${toBanglaNumber(d.students_count)} জন", Icons.Default.School, Color(0xFFECFDF5), Color(0xFF047857)),
-                    KpiItem("শিক্ষক ও স্টাফ", "${toBanglaNumber(d.teachers_count)} জন", Icons.Default.People, Color(0xFFEEF2FF), Color(0xFF4338CA)),
-                    KpiItem("সক্রিয় জামাত", "${toBanglaNumber(d.classes_count)} টি", Icons.Default.MenuBook, Color(0xFFFEF3C7), Color(0xFFB45309)),
-                    KpiItem("আজকের হাজিরা (${toBanglaNumber(attendancePct)}%)", "${toBanglaNumber(d.today_present)} / ${toBanglaNumber(d.today_absent)}", Icons.Default.HowToReg, Color(0xFFCCFBF1), Color(0xFF0F766E))
+                    KpiItem("মোট শিক্ষার্থী", "${toBanglaNumber(d.students_count)} জন", Icons.Default.School, Color(0xFFECFDF5), Color(0xFF059669), "সকল শিক্ষার্থী", Routes.STUDENTS),
+                    KpiItem("শিক্ষক ও স্টাফ", "${toBanglaNumber(d.teachers_count)} জন", Icons.Default.People, Color(0xFFF0F9FF), Color(0xFF0284C7), "শিক্ষক ও স্টাফ", Routes.OPERATIONS),
+                    KpiItem("সক্রিয় জামাত", "${toBanglaNumber(d.classes_count)} টি", Icons.Default.MenuBook, Color(0xFFFFFBEB), Color(0xFFD97706), "জামাত ও সবক", Routes.HIFZ_KITAB),
+                    KpiItem("আজকের হাজিরা", "${toBanglaNumber(d.today_present)} জন", Icons.Default.HowToReg, Color(0xFFF0FDFA), Color(0xFF0D9488), "হার: ${toBanglaNumber(attendancePct)}%", Routes.ATTENDANCE, attendancePct)
                 )
 
-                // 3. Responsive 1/2/4-column Academic KPIs
-                item {
-                    ResponsiveGrid(items = academicKpis) { item, mod ->
-                        WebStyleKpiCard(item, mod)
-                    }
-                }
-
-                // 4. Finance Scope Toggle (সর্বমোট vs আজকের) + Responsive Finance KPIs
+                // 3. Academic & Attendance Header + Finance Scope Toggle
                 item {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text("আর্থিক সারসংক্ষেপ", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                        Text("সার্বিক পরিসংখ্যান", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                         Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                             FilterChip(selected = financeScope == "total", onClick = { financeScope = "total" }, label = { Text("সর্বমোট") })
                             FilterChip(selected = financeScope == "today", onClick = { financeScope = "today" }, label = { Text("আজকের") })
@@ -205,20 +291,57 @@ fun AdminDashboardScreen(
                     }
                 }
 
+                item {
+                    ResponsiveGrid(items = academicKpis) { item, mod ->
+                        WebStyleKpiCard(item, mod) { onNavigate(item.route) }
+                    }
+                }
+
+                // 4. Financial Highlight Strip (3 Columns)
                 val activeIncome = if (financeScope == "today") d.today_income else d.total_income
                 val activeExpense = if (financeScope == "today") d.today_expense else d.total_expense
                 val activeNet = activeIncome - activeExpense
                 val savingsRate = if (activeIncome > 0) ((activeNet / activeIncome) * 100).toInt() else 0
 
                 val financeKpis = listOf(
-                    KpiItem(if (financeScope == "today") "আজকের আয়" else "মোট আয়", formatBanglaCurrency(activeIncome), Icons.Default.TrendingUp, Color(0xFFECFDF5), Color(0xFF047857)),
-                    KpiItem(if (financeScope == "today") "আজকের ব্যয়" else "মোট ব্যয়", formatBanglaCurrency(activeExpense), Icons.Default.TrendingDown, Color(0xFFFFF1F2), Color(0xFFBE123C)),
-                    KpiItem("নিট ব্যালেন্স (${toBanglaNumber(savingsRate)}%)", formatBanglaCurrency(activeNet), Icons.Default.AccountBalanceWallet, Color(0xFFCCFBF1), Color(0xFF0F766E))
+                    FinanceKpiItem(
+                        title = if (financeScope == "today") "আজকের মোট আয়" else "মোট আয় (ফান্ড কালেকশন)",
+                        badgeText = "আয়",
+                        badgeBg = Color(0xFFECFDF5),
+                        badgeTint = Color(0xFF047857),
+                        amount = formatBanglaCurrency(activeIncome),
+                        amountColor = Color(0xFF059669),
+                        subtitle = if (financeScope == "today") "আজকের ফি ও অনুদান সংগ্রহ" else "আজকের কালেকশন: ${formatBanglaCurrency(d.today_income)}",
+                        actionLabel = "হিস্ট্রি ↗",
+                        route = Routes.FINANCE
+                    ),
+                    FinanceKpiItem(
+                        title = if (financeScope == "today") "আজকের মোট ব্যয়" else "মোট ব্যয় (বোর্ডিং সহ)",
+                        badgeText = "ব্যয়",
+                        badgeBg = Color(0xFFFFF1F2),
+                        badgeTint = Color(0xFFBE123C),
+                        amount = formatBanglaCurrency(activeExpense),
+                        amountColor = Color(0xFFE11D48),
+                        subtitle = if (financeScope == "today") "আজকের সাধারণ ও বাজার খরচ" else "সর্বমোট প্রাতিষ্ঠানিক খরচ",
+                        actionLabel = null,
+                        route = Routes.FINANCE
+                    ),
+                    FinanceKpiItem(
+                        title = if (financeScope == "today") "আজকের নিট উদ্বৃত্ত" else "নিট ফান্ড স্থিতি (উদ্বৃত্ত)",
+                        badgeText = if (activeNet >= 0) "উদ্বৃত্ত" else "ঘাটতি",
+                        badgeBg = if (activeNet >= 0) Color(0xFFF0F9FF) else Color(0xFFFFFBEB),
+                        badgeTint = if (activeNet >= 0) Color(0xFF0369A1) else Color(0xFFB45309),
+                        amount = formatBanglaCurrency(kotlin.math.abs(activeNet)),
+                        amountColor = if (activeNet >= 0) Color(0xFF0284C7) else Color(0xFFD97706),
+                        subtitle = if (activeIncome > 0) "আয়-ব্যয় অনুপাত: ${toBanglaNumber(savingsRate)}%" else "আর্থিক সার্বিক অবস্থা",
+                        actionLabel = "অ্যাকাউন্টিং ↗",
+                        route = Routes.FINANCE
+                    )
                 )
 
                 item {
                     ResponsiveGrid(items = financeKpis, maxColumnsTablet = 3) { item, mod ->
-                        WebStyleKpiCard(item, mod)
+                        WebStyleFinanceCard(item, mod) { onNavigate(item.route) }
                     }
                 }
 
@@ -256,37 +379,132 @@ fun AdminDashboardScreen(
 }
 
 @Composable
-private fun WebStyleKpiCard(item: KpiItem, modifier: Modifier = Modifier) {
-    ElevatedCard(modifier = modifier, shape = RoundedCornerShape(16.dp)) {
-        Row(
-            modifier = Modifier.padding(14.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(38.dp)
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(item.badgeBg),
-                contentAlignment = Alignment.Center
+private fun WebStyleKpiCard(item: KpiItem, modifier: Modifier = Modifier, onClick: () -> Unit) {
+    OutlinedCard(
+        onClick = onClick,
+        modifier = modifier,
+        shape = RoundedCornerShape(16.dp),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+    ) {
+        Column(modifier = Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Top
             ) {
-                Icon(item.icon, contentDescription = null, tint = item.badgeTint, modifier = Modifier.size(20.dp))
+                Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text(
+                        item.title,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Text(
+                        item.value,
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.ExtraBold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+                Box(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(item.badgeBg),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(item.icon, contentDescription = null, tint = item.badgeTint, modifier = Modifier.size(20.dp))
+                }
             }
-            Column {
+
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f))
+
+            if (item.progressPct != null) {
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                        Text(item.footerLabel, style = MaterialTheme.typography.labelSmall, color = Color(0xFF047857), fontWeight = FontWeight.SemiBold)
+                    }
+                    LinearProgressIndicator(
+                        progress = { (item.progressPct.coerceIn(0, 100)) / 100f },
+                        modifier = Modifier.fillMaxWidth().height(6.dp).clip(RoundedCornerShape(4.dp)),
+                        color = Color(0xFF10B981),
+                        trackColor = MaterialTheme.colorScheme.surfaceVariant
+                    )
+                }
+            } else {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(item.footerLabel, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    Icon(Icons.Default.ArrowForward, contentDescription = null, modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun WebStyleFinanceCard(item: FinanceKpiItem, modifier: Modifier = Modifier, onClick: () -> Unit) {
+    OutlinedCard(
+        onClick = onClick,
+        modifier = modifier,
+        shape = RoundedCornerShape(16.dp),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+    ) {
+        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Text(
                     item.title,
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.weight(1f),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
+                Surface(color = item.badgeBg, shape = RoundedCornerShape(100.dp)) {
+                    Text(
+                        item.badgeText,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = item.badgeTint
+                    )
+                }
+            }
+
+            Text(
+                item.amount,
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.ExtraBold,
+                color = item.amountColor,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Text(
-                    item.value,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
+                    item.subtitle,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.weight(1f),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
+                item.actionLabel?.let { lbl ->
+                    Text(lbl, style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = item.amountColor)
+                }
             }
         }
     }
